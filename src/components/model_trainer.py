@@ -3,6 +3,7 @@ import sys
 from dataclasses import dataclass
 
 from catboost import CatBoostRegressor
+from xgboost import XGBRegressor
 from sklearn.ensemble import (
     AdaBoostRegressor,
     GradientBoostingRegressor,
@@ -11,8 +12,6 @@ from sklearn.ensemble import (
 from sklearn.linear_model import LinearRegression
 from sklearn.neighbors import KNeighborsRegressor
 from sklearn.tree import DecisionTreeRegressor
-from xgboost import XGBRegressor
-
 from sklearn.metrics import r2_score
 
 from src.exception import CustomException
@@ -31,7 +30,7 @@ class ModelTrainer:
 
     def initiate_model_trainer(self, train_array, test_array):
         try:
-            logging.info("Split the data into train and test")
+            logging.info("Start of the model training process")
             X_train, y_train, X_test, y_test = (
                 train_array[:, :-1],
                 train_array[:, -1],
@@ -51,12 +50,60 @@ class ModelTrainer:
 
             logging.info("Training the models")
 
+            # Define parameter grids for each model
+            param_grids = {
+                "Decision Tree": {
+                    "criterion": [
+                        "squared_error",
+                        "friedman_mse",
+                        "absolute_error",
+                        "poisson",
+                    ],
+                    # 'splitter':['best','random'],
+                    # 'max_features':['sqrt','log2'],
+                },
+                "Random Forest": {
+                    # 'criterion':['squared_error', 'friedman_mse', 'absolute_error', 'poisson'],
+                    # 'max_features':['sqrt','log2',None],
+                    "n_estimators": [8, 16, 32, 64, 128, 256]
+                },
+                "Gradient Boosting": {
+                    # 'loss':['squared_error', 'huber', 'absolute_error', 'quantile'],
+                    "learning_rate": [0.1, 0.01, 0.05, 0.001],
+                    "subsample": [0.6, 0.7, 0.75, 0.8, 0.85, 0.9],
+                    # 'criterion':['squared_error', 'friedman_mse'],
+                    # 'max_features':['auto','sqrt','log2'],
+                    "n_estimators": [8, 16, 32, 64, 128, 256],
+                },
+                "Linear Regression": {},
+                "XGBoost": {
+                    "learning_rate": [0.1, 0.01, 0.05, 0.001],
+                    "n_estimators": [8, 16, 32, 64, 128, 256],
+                },
+                "CatBoost": {
+                    "depth": [6, 8, 10],
+                    "learning_rate": [0.01, 0.05, 0.1],
+                    "iterations": [30, 50, 100],
+                },
+                "AdaBoost": {
+                    "learning_rate": [0.1, 0.01, 0.5, 0.001],
+                    # 'loss':['linear','square','exponential'],
+                    "n_estimators": [8, 16, 32, 64, 128, 256],
+                },
+                "KNN": {
+                    "n_neighbors": [3, 5, 10, 15],
+                    "weights": ["uniform", "distance"],
+                    "p": [1, 2],
+                },
+            }
+
             model_report: dict = evaluate_models(
                 X_train=X_train,
                 y_train=y_train,
                 X_test=X_test,
                 y_test=y_test,
                 models=models,
+                param=param_grids,
             )
 
             # to get the best model score from dict
