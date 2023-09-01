@@ -5,4 +5,5 @@ matplotlib
 scikit-learn
 catboost --only-binary=:all:
 xgboost
+Flask
 #-e .
