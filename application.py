@@ -6,18 +6,18 @@ from sklearn.preprocessing import StandardScaler
 
 from src.pipeline.predict_pipeline import PredictPipeline, CustomData
 
-application = Flask(__name__)
-app = application
+applicationlication = Flask(__name__)
+application = applicationlication
 
 
 ## Route for a home page
-@app.route("/")
+@application.route("/")
 def home():
     return render_template("index.html")
 
 
 ## Route for a prediction page
-@app.route("/predict", methods=["GET", "POST"])
+@application.route("/predict", methods=["GET", "POST"])
 def predict():
     if request.method == "GET":
         return render_template("predict.html")
@@ -99,4 +99,6 @@ def predict():
 
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", debug=True)  # If you want to test it locally activate debug
+    application.run(
+        host="0.0.0.0", debug=True
+    )  # If you want to test it locally activate debug
